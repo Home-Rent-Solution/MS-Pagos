@@ -1,6 +1,7 @@
 package com.HomeRentSolution.MS_Pagos.service;
 
 
+import com.HomeRentSolution.MS_Pagos.assemblers.PagoAssembler;
 import com.HomeRentSolution.MS_Pagos.dto.PagoCancelacionEvento;
 import com.HomeRentSolution.MS_Pagos.dto.PagoCreacionEvento;
 import com.HomeRentSolution.MS_Pagos.dto.PagoResponseDTO;
@@ -25,6 +26,9 @@ public class PagoService {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private PagoAssembler pagoAssembler;
 
 
     // crearPago sigue recibiendo ReservaDTO porque lo llama ms-reservas
@@ -63,7 +67,9 @@ public class PagoService {
     }
 
     public void cancelarPago (ReservaDTO request){
-        Pago pagoExistente = pagoRepository.findByIdReserva(request.getIdReserva()).orElseThrow(...);
+        Pago pagoExistente = pagoRepository.findByIdReserva(request.getIdReserva())
+                .orElseThrow(() -> new RuntimeException(
+                        "No se encontró el pago para la reserva: " + request.getIdReserva()));
         pagoExistente.setEstadoPago(EstadoPago.CANCELADO);
         pagoRepository.save(pagoExistente);
 
@@ -82,14 +88,14 @@ public class PagoService {
     public PagoResponseDTO obtenerRecibo(Long idPago) {
         Pago pago = pagoRepository.findByIdPago(idPago)
                 .orElseThrow(() -> new RuntimeException("Pago no encontrado"));
-        return mapearAResponse(pago);
+        return pagoAssembler.toModel(pago);
     }
 
     // Todos los pagos de un inquilino
     public List<PagoResponseDTO> obtenerCuentaPorInquilino(Long idInquilino) {
         return pagoRepository.findByIdInquilino(idInquilino)
                 .stream()
-                .map(this::mapearAResponse)
+                .map(pago -> pagoAssembler.toModel(pago))
                 .toList();
     }
 
@@ -97,7 +103,7 @@ public class PagoService {
     public List<PagoResponseDTO> obtenerTodos() {
         return pagoRepository.findAll()
                 .stream()
-                .map(this::mapearAResponse)
+                .map(pago -> pagoAssembler.toModel(pago))
                 .toList();
     }
 
@@ -105,7 +111,7 @@ public class PagoService {
     public PagoResponseDTO obtenerDetallePorAdmin(Long idPago) {
         Pago pago = pagoRepository.findByIdPago(idPago)
                 .orElseThrow(() -> new RuntimeException("Pago no encontrado"));
-        return mapearAResponse(pago);
+        return pagoAssembler.toModel(pago);
     }
 
 }
