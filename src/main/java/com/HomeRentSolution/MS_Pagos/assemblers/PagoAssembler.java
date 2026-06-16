@@ -15,6 +15,13 @@ public class PagoAssembler extends RepresentationModelAssemblerSupport <Pago, Pa
         super(PagoController.class, PagoResponseDTO.class);
     }
 
+    public PagoResponseDTO agregarLinks(PagoResponseDTO dto) {
+
+        dto.add(linkTo(methodOn(PagoController.class).obtenerRecibo(dto.getIdPago())).withSelfRel());
+
+        return dto;
+    }
+
     @Override
     public PagoResponseDTO toModel(Pago entidad) {
         PagoResponseDTO dto = new PagoResponseDTO();
@@ -28,6 +35,8 @@ public class PagoAssembler extends RepresentationModelAssemblerSupport <Pago, Pa
         dto.setFechaPago(entidad.getFechaPago());
         dto.setFechaVencimiento(entidad.getFechaVencimiento());
         dto.setEstadoPago(entidad.getEstadoPago());
+
+        dto.add(linkTo(methodOn(PagoController.class).obtenerRecibo(entidad.getIdPago())).withSelfRel());
 
         return dto;
     }

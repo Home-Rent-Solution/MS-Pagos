@@ -1,11 +1,14 @@
 package com.HomeRentSolution.MS_Pagos.controller;
 
+import com.HomeRentSolution.MS_Pagos.assemblers.PagoAssembler;
 import com.HomeRentSolution.MS_Pagos.dto.PagoResponseDTO;
 import com.HomeRentSolution.MS_Pagos.dto.ReservaDTO;
+import com.HomeRentSolution.MS_Pagos.model.Pago;
 import com.HomeRentSolution.MS_Pagos.service.PagoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +23,9 @@ public class PagoController {
 
     private final PagoService pagoServicios;
 
+    @Autowired
+    private PagoAssembler assembler;
+
 
     @PostMapping
     public ResponseEntity<Void> crearPago(@RequestBody ReservaDTO reservaDTO) {
@@ -29,8 +35,11 @@ public class PagoController {
 
     @GetMapping("/recibo/{idPago}")
     public ResponseEntity<PagoResponseDTO> obtenerRecibo(@PathVariable Long idPago) {
-        PagoResponseDTO recibo = pagoServicios.obtenerRecibo(idPago);
-        return ResponseEntity.ok(recibo);
+        PagoResponseDTO dto = pagoServicios.obtenerRecibo(idPago);
+
+        PagoResponseDTO response = assembler.agregarLinks(dto);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/cuenta/inquilino/{idInquilino}")
