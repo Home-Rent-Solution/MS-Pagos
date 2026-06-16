@@ -12,5 +12,6 @@ public class ReservaDTO extends RepresentationModel<ReservaDTO>{
     private Long idPropiedad;
     private Long idInquilino;
     private BigDecimal montoTotal;
+    private BigDecimal montoReembolso;
     private LocalDateTime fechaVencimiento;
 }

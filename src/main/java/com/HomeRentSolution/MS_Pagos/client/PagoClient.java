@@ -10,5 +10,5 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface PagoClient {
 
     @GetMapping("/api/reservas/{id}")
-    ReservaDTO obtenerReservaPorId(@PathVariable Long id);
+    ReservaDTO obtenerPorId(@PathVariable Long idReserva);
 }

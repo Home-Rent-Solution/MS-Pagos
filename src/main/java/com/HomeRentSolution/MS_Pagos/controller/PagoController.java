@@ -52,4 +52,6 @@ public class PagoController {
         PagoResponseDTO detalle = pagoServicios.obtenerDetallePorAdmin(idPago);
         return ResponseEntity.ok(detalle);
     }
+
+
 }

@@ -35,6 +35,9 @@ public class Pago {
     @Column(nullable = false)
     private BigDecimal montoPagado;
 
+    @Column(nullable = false)
+    private BigDecimal montoReembolso;
+
     @Enumerated(EnumType.STRING)
     private EstadoPago estadoPago;
 
