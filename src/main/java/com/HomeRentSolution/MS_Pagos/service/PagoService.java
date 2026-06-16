@@ -27,12 +27,13 @@ public class PagoService {
         nuevoPago.setMontoTotal(request.getMontoTotal());
         nuevoPago.setMontoPagado(BigDecimal.ZERO);
         nuevoPago.setFechaVencimiento(LocalDateTime.now().plusDays(3));
+
         nuevoPago.setFechaPago(null);
         nuevoPago.setEstadoPago(EstadoPago.PENDIENTE);
 
-        Pago guardado = pagoRepository.save(nuevoPago);
-        return mapearAResponse(guardado);
+        return pagoRepository.save(nuevoPago);
     }
+
 
     // Recibo de un pago específico
     public PagoResponseDTO obtenerRecibo(Long idPago) {
@@ -62,20 +63,6 @@ public class PagoService {
         Pago pago = pagoRepository.findByIdPago(idPago)
                 .orElseThrow(() -> new RuntimeException("Pago no encontrado"));
         return mapearAResponse(pago);
-    }
-
-    private PagoResponseDTO mapearAResponse(Pago pago) {
-        PagoResponseDTO response = new PagoResponseDTO();
-        response.setIdPago(pago.getIdPago());
-        response.setIdReserva(pago.getIdReserva());
-        response.setIdPropiedad(pago.getIdPropiedad());
-        response.setIdInquilino(pago.getIdInquilino());
-        response.setMontoTotal(pago.getMontoTotal());
-        response.setMontoPagado(pago.getMontoPagado());
-        response.setFechaPago(pago.getFechaPago());
-        response.setFechaVencimiento(pago.getFechaVencimiento());
-        response.setEstadoPago(pago.getEstadoPago());
-        return response;
     }
 
 }
