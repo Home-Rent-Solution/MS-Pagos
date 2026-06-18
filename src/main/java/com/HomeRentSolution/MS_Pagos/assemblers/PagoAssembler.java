@@ -1,6 +1,7 @@
 package com.HomeRentSolution.MS_Pagos.assemblers;
 
 import com.HomeRentSolution.MS_Pagos.controller.PagoController;
+import com.HomeRentSolution.MS_Pagos.controller.PagoV2Controller;
 import com.HomeRentSolution.MS_Pagos.dto.PagoResponseDTO;
 import com.HomeRentSolution.MS_Pagos.model.Pago;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
@@ -12,14 +13,7 @@ public class PagoAssembler extends RepresentationModelAssemblerSupport <Pago, Pa
 
     public PagoAssembler(){
 
-        super(PagoController.class, PagoResponseDTO.class);
-    }
-
-    public PagoResponseDTO agregarLinks(PagoResponseDTO dto) {
-
-        dto.add(linkTo(methodOn(PagoController.class).obtenerRecibo(dto.getIdPago())).withSelfRel());
-
-        return dto;
+        super(PagoV2Controller.class, PagoResponseDTO.class);
     }
 
     @Override
@@ -36,7 +30,7 @@ public class PagoAssembler extends RepresentationModelAssemblerSupport <Pago, Pa
         dto.setFechaVencimiento(entidad.getFechaVencimiento());
         dto.setEstadoPago(entidad.getEstadoPago());
 
-        dto.add(linkTo(methodOn(PagoController.class).obtenerRecibo(entidad.getIdPago())).withSelfRel());
+        dto.add(linkTo(methodOn(PagoV2Controller.class).obtenerPorId(entidad.getIdPago())).withSelfRel());
 
         return dto;
     }
