@@ -11,7 +11,7 @@ public class AppConfig {
     @Bean
     public Request.Options feignOptions() {
 
-        return new Request.Options(5000, 10000); // 5s conexión, 10s lectura
+        return new Request.Options(5000, 10000);
     }
 
     public static final String PAGOS_EXCHANGE = "pagos.exchange";

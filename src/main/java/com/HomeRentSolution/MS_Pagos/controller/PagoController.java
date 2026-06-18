@@ -2,6 +2,7 @@ package com.HomeRentSolution.MS_Pagos.controller;
 
 import com.HomeRentSolution.MS_Pagos.dto.PagoResponseDTO;
 import com.HomeRentSolution.MS_Pagos.dto.ReservaDTO;
+import com.HomeRentSolution.MS_Pagos.model.Pago;
 import com.HomeRentSolution.MS_Pagos.service.PagoService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +28,20 @@ public class PagoController {
 
     @GetMapping("/recibo/{idPago}")
     public ResponseEntity<PagoResponseDTO> obtenerPorId(@PathVariable Long idPago) {
-        PagoResponseDTO dto = pagoServicios.obtenerRecibo(idPago);
+        Pago pago = pagoServicios.obtenerEntidadPorId(idPago);
+
+        // Mapeo plano manual (Sin links HATEOAS)
+        PagoResponseDTO dto = new PagoResponseDTO();
+        dto.setIdPago(pago.getIdPago());
+        dto.setEstadoPago(pago.getEstadoPago());
+        // ... setear los demás campos ...
+
         return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/cuenta/inquilino/{idInquilino}")
     public ResponseEntity<List<PagoResponseDTO>> obtenerCuentaPorInquilino(@PathVariable Long idInquilino) {
-        List<PagoResponseDTO> cuenta = pagoServicios.obtenerCuentaPorInquilino(idInquilino);
+        List<PagoResponseDTO> cuenta = pagoServicios.obtenerPorInquilino(idInquilino);
         return ResponseEntity.ok(cuenta);
     }
 

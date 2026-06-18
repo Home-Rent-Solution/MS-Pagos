@@ -2,28 +2,32 @@ package com.HomeRentSolution.MS_Pagos.mensajeria;
 
 import com.HomeRentSolution.MS_Pagos.dto.ReservaDTO;
 import com.HomeRentSolution.MS_Pagos.service.PagoService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class PagoListeners {
 
-    @Autowired
+
     private PagoService pagoService;
 
 
-    @RabbitListener(queues = "mensajeria.reserva.creada.queue")
+    @RabbitListener(queues = "pagos.reserva-creada.queue")
     public void recibirNuevaReserva(ReservaDTO creacion) {
-        System.out.println("Listener de Pagos: Llegó orden de creacion de pago " + creacion.getIdReserva());
+        log.info("[RabbitMQ] MS-Pagos recibió orden de creación para la Reserva ID: {}", creacion.getIdReserva());
         pagoService.crearPago(creacion);
     }
 
-    @RabbitListener(queues = "mensajeria.reserva.cancelada.queue")
+    @RabbitListener(queues = "pagos.reserva-cancelada.queue")
     public void recibirReservaCancelada(ReservaDTO evento) {
+        log.info("[RabbitMQ] MS-Pagos recibió orden de cancelación para la Reserva ID: {}", evento.getIdReserva());
 
-        System.out.println("Listener de Pagos: Llegó orden de cancelación de pago " + evento.getIdReserva());
-        pagoService.cancelarPago(evento);
+
+        pagoService.eliminarPago(evento.getIdReserva());
     }
 
 

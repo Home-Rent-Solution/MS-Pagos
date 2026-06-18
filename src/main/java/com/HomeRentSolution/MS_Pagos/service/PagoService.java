@@ -10,8 +10,9 @@ import com.HomeRentSolution.MS_Pagos.model.EstadoPago;
 import com.HomeRentSolution.MS_Pagos.model.Pago;
 import com.HomeRentSolution.MS_Pagos.repository.PagoRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,98 +21,89 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PagoService {
 
     private final PagoRepository pagoRepository;
+    private final RabbitTemplate rabbitTemplate;
 
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
-
-    @Autowired
-    private PagoAssembler pagoAssembler;
-
-
-    // crearPago sigue recibiendo ReservaDTO porque lo llama ms-reservas
+    @Transactional
     public PagoResponseDTO crearPago(ReservaDTO request) {
         Pago nuevoPago = new Pago();
-
         nuevoPago.setIdReserva(request.getIdReserva());
         nuevoPago.setIdPropiedad(request.getIdPropiedad());
         nuevoPago.setIdInquilino(request.getIdInquilino());
         nuevoPago.setMontoTotal(request.getMontoTotal());
         nuevoPago.setMontoPagado(BigDecimal.ZERO);
         nuevoPago.setFechaVencimiento(LocalDateTime.now().plusDays(3));
-
         nuevoPago.setFechaPago(null);
         nuevoPago.setEstadoPago(EstadoPago.PENDIENTE);
 
         pagoRepository.save(nuevoPago);
 
-        PagoCreacionEvento evento = new PagoCreacionEvento(
 
+        PagoCreacionEvento evento = new PagoCreacionEvento(
                 request.getIdReserva(),
                 request.getIdPropiedad(),
                 request.getIdInquilino(),
                 request.getMontoTotal()
         );
-
-
         rabbitTemplate.convertAndSend("pagos.exchange", "", evento);
-        System.out.println("Mensaje enviado al exchange de pagos para la Reserva: " + request.getIdReserva());
+        log.info("[RabbitMQ] Mensaje enviado al exchange de pagos para la Reserva: {}", request.getIdReserva());
 
+        // Armamos la respuesta corta de confirmación
         PagoResponseDTO response = new PagoResponseDTO();
-        response.setIdPago(nuevoPago.getIdPago()); // Asumiendo que tu entidad Pago genera un ID
-        response.setEstadoPago(EstadoPago.valueOf(nuevoPago.getEstadoPago().toString()));
+        response.setIdPago(nuevoPago.getIdPago());
+        response.setEstadoPago(nuevoPago.getEstadoPago());
 
         return response;
     }
 
-    public void cancelarPago (ReservaDTO request){
+    @Transactional
+    public void cancelarPago(ReservaDTO request) {
         Pago pagoExistente = pagoRepository.findByIdReserva(request.getIdReserva())
                 .orElseThrow(() -> new RuntimeException(
                         "No se encontró el pago para la reserva: " + request.getIdReserva()));
+
         pagoExistente.setEstadoPago(EstadoPago.CANCELADO);
         pagoRepository.save(pagoExistente);
 
-        // Tu forma de "responderle" al sistema es este evento, no un return.
+
         PagoCancelacionEvento evento = new PagoCancelacionEvento(
                 request.getIdReserva(),
                 pagoExistente.getIdPropiedad(),
                 pagoExistente.getIdInquilino(),
-                pagoExistente.getMontoReembolso());
-
+                pagoExistente.getMontoReembolso()
+        );
         rabbitTemplate.convertAndSend("pagos.cancelados.exchange", "", evento);
+        log.info("[RabbitMQ] Mensaje de cancelación enviado para la Reserva: {}", request.getIdReserva());
     }
 
-
-    // Recibo de un pago específico
-    public PagoResponseDTO obtenerRecibo(Long idPago) {
-        Pago pago = pagoRepository.findByIdPago(idPago)
-                .orElseThrow(() -> new RuntimeException("Pago no encontrado"));
-        return pagoAssembler.toModel(pago);
+    @Transactional
+    public void eliminarPago(Long id) {
+        Pago pago = pagoRepository.findByIdPago(id)
+                .orElseThrow(() -> new RuntimeException("No se pudo eliminar: Pago no encontrado"));
+        pagoRepository.delete(pago);
+        log.info("Pago eliminado físicamente de la base de datos: ID {}", id);
     }
 
-    // Todos los pagos de un inquilino
-    public List<PagoResponseDTO> obtenerCuentaPorInquilino(Long idInquilino) {
-        return pagoRepository.findByIdInquilino(idInquilino)
-                .stream()
-                .map(pago -> pagoAssembler.toModel(pago))
-                .toList();
+    // =========================================================================
+    // CONSULTAS DE ENTIDADES PURAS (¡MÚSICA PARA EL CONTROLLER 2 / ASSEMBLER!)
+    // =========================================================================
+    // Quitando el Assembler de aquí, estos métodos devuelven la Entidad Pura.
+    // Esto te permitirá mapear links de HATEOAS de forma dinámica en el Controller 2.
+
+    public Pago obtenerEntidadPorId(Long idPago) {
+        return pagoRepository.findByIdPago(idPago)
+                .orElseThrow(() -> new RuntimeException("Pago no encontrado con ID: " + idPago));
     }
 
-    // Todos los pagos (vista admin)
-    public List<PagoResponseDTO> obtenerTodos() {
-        return pagoRepository.findAll()
-                .stream()
-                .map(pago -> pagoAssembler.toModel(pago))
-                .toList();
+    public List<Pago> obtenerTodos() {
+        return pagoRepository.findAll();
     }
 
-    // Detalle de un pago (vista admin)
-    public PagoResponseDTO obtenerDetallePorAdmin(Long idPago) {
-        Pago pago = pagoRepository.findByIdPago(idPago)
-                .orElseThrow(() -> new RuntimeException("Pago no encontrado"));
-        return pagoAssembler.toModel(pago);
+    public List<Pago> obtenerPorInquilino(Long idInquilino) {
+        return pagoRepository.findByIdInquilino(idInquilino);
     }
 
 }

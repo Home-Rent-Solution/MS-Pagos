@@ -36,13 +36,11 @@ public class PagoV2Controller {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
-    public ResponseEntity<CollectionModel<PagoResponseDTO>> obtenerTodosConEnlaces() {
+    @GetMapping("/recibo/{idPago}")
+    public ResponseEntity<PagoResponseDTO> obtenerPorIdConEnlaces(@PathVariable Long idPago) {
+        Pago pago = pagoServicios.obtenerEntidadPorId(idPago);
 
-        List<Pago> pagosEntidades = pagoServicios.obtenerTodasLasEntidades();
-
-        CollectionModel<PagoResponseDTO> responseCollection = assembler.toCollectionModel(pagosEntidades);
-
-        return ResponseEntity.ok(responseCollection);
+        // AQUÍ es donde debe ejecutarse el Assembler. Cumple las reglas de REST Nivel 3.
+        return ResponseEntity.ok(assembler.toModel(pago));
     }
 }
