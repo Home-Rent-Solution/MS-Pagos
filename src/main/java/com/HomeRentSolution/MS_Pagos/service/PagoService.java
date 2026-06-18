@@ -87,11 +87,6 @@ public class PagoService {
         log.info("Pago eliminado físicamente de la base de datos: ID {}", id);
     }
 
-    // =========================================================================
-    // CONSULTAS DE ENTIDADES PURAS (¡MÚSICA PARA EL CONTROLLER 2 / ASSEMBLER!)
-    // =========================================================================
-    // Quitando el Assembler de aquí, estos métodos devuelven la Entidad Pura.
-    // Esto te permitirá mapear links de HATEOAS de forma dinámica en el Controller 2.
 
     public Pago obtenerEntidadPorId(Long idPago) {
         return pagoRepository.findByIdPago(idPago)

@@ -1,5 +1,6 @@
 package com.HomeRentSolution.MS_Pagos.controller;
 
+import com.HomeRentSolution.MS_Pagos.assemblers.PagoAssembler;
 import com.HomeRentSolution.MS_Pagos.dto.PagoResponseDTO;
 import com.HomeRentSolution.MS_Pagos.dto.ReservaDTO;
 import com.HomeRentSolution.MS_Pagos.model.Pago;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/pagos")
@@ -19,6 +21,7 @@ import java.util.List;
 public class PagoController {
 
     private final PagoService pagoServicios;
+    private final PagoAssembler assembler;
 
     @PostMapping
     public ResponseEntity<Void> crearPago(@RequestBody ReservaDTO reservaDTO) {
@@ -41,13 +44,25 @@ public class PagoController {
 
     @GetMapping("/cuenta/inquilino/{idInquilino}")
     public ResponseEntity<List<PagoResponseDTO>> obtenerCuentaPorInquilino(@PathVariable Long idInquilino) {
-        List<PagoResponseDTO> cuenta = pagoServicios.obtenerPorInquilino(idInquilino);
-        return ResponseEntity.ok(cuenta);
+        List<Pago> pagos = pagoServicios.obtenerPorInquilino(idInquilino);
+        List<PagoResponseDTO> dtos = pagos.stream()
+                .map(pago -> {
+                    PagoResponseDTO dto = new PagoResponseDTO();
+                    dto.setIdPago(pago.getIdPago());
+                    dto.setEstadoPago(pago.getEstadoPago());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping
     public ResponseEntity<List<PagoResponseDTO>> buscarTodosLosPagos() {
-        return ResponseEntity.ok(pagoServicios.obtenerTodos());
+        List<Pago> pagos = pagoServicios.obtenerTodos();
+        List<PagoResponseDTO> dtos = pagos.stream()
+                .map(assembler::toModel)  //
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @DeleteMapping("/{id}")
