@@ -34,7 +34,7 @@ HATEOAS
 Obtener todos los seguros con enlaces
 GET /api/v2/pagos
 
-Obtener seguro por ID con enlaces
+Obtener pagos por ID con enlaces
 GET /api/v2/pagos/{id}
 Integraciones
 Este microservicio utiliza OpenFeign para comunicarse con:
