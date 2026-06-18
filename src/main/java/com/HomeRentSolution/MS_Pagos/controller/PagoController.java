@@ -23,45 +23,26 @@ public class PagoController {
 
     private final PagoService pagoServicios;
 
-    @Autowired
-    private PagoAssembler assembler;
-
-
     @PostMapping
     public ResponseEntity<Void> crearPago(@RequestBody ReservaDTO reservaDTO) {
         pagoServicios.crearPago(reservaDTO);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    // V1 REAL: Retorna el DTO plano, sin enlaces HATEOAS
     @GetMapping("/recibo/{idPago}")
     public ResponseEntity<PagoResponseDTO> obtenerPorId(@PathVariable Long idPago) {
         PagoResponseDTO dto = pagoServicios.obtenerRecibo(idPago);
-
-        PagoResponseDTO response = assembler.agregarLinks(dto);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/cuenta/inquilino/{idInquilino}")
-    public ResponseEntity<List<PagoResponseDTO>> obtenerCuentaPorInquilino(
-            @PathVariable Long idInquilino) {
+    public ResponseEntity<List<PagoResponseDTO>> obtenerCuentaPorInquilino(@PathVariable Long idInquilino) {
         List<PagoResponseDTO> cuenta = pagoServicios.obtenerCuentaPorInquilino(idInquilino);
         return ResponseEntity.ok(cuenta);
     }
 
-    @GetMapping("/admin")
-    public ResponseEntity<List<PagoResponseDTO>> obtenerTodos() {
-        List<PagoResponseDTO> pagos = pagoServicios.obtenerTodos();
-        return ResponseEntity.ok(pagos);
-    }
-
-    @GetMapping("/admin/{idPago}")
-    public ResponseEntity<PagoResponseDTO> obtenerDetallePorAdmin(
-            @PathVariable Long idPago) {
-        PagoResponseDTO detalle = pagoServicios.obtenerDetallePorAdmin(idPago);
-        return ResponseEntity.ok(detalle);
-    }
-
+    // Un solo método para listar todo. Eliminamos el duplicado de /admin
     @GetMapping
     public ResponseEntity<List<PagoResponseDTO>> buscarTodosLosPagos() {
         return ResponseEntity.ok(pagoServicios.obtenerTodos());
