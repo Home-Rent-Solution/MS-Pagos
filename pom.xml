@@ -8,10 +8,10 @@
 		<version>3.5.15</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.example</groupId>
-	<artifactId>demo</artifactId>
+	<groupId>com.HomeRentSolution</groupId>
+	<artifactId>MS-Pagos</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
+	<name>MS-Pagos</name>
 	<description/>
 	<url/>
 	<licenses>

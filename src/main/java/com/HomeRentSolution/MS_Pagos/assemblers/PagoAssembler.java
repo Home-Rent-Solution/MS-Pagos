@@ -1,6 +1,5 @@
 package com.HomeRentSolution.MS_Pagos.assemblers;
 
-import com.HomeRentSolution.MS_Pagos.controller.PagoController;
 import com.HomeRentSolution.MS_Pagos.controller.PagoV2Controller;
 import com.HomeRentSolution.MS_Pagos.dto.PagoResponseDTO;
 import com.HomeRentSolution.MS_Pagos.model.Pago;

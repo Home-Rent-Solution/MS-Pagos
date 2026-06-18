@@ -15,7 +15,9 @@ public class AppConfig {
     }
 
     public static final String PAGOS_EXCHANGE = "pagos.exchange";
-    public static final String RESERVAS_QUEUE = "pagos.reservas.queue";
+    public static final String RESERVAS_QUEUE = "pagos.reserva-creada.queue";
+    public static final String QUEUE_RESERVA_CANCELADA = "pagos.reserva-cancelada.queue";
+
 
     public static final String ROUTING_CREADO = "pago.creado";
     public static final String ROUTING_ELIMINADO = "pago.eliminado";
@@ -31,6 +33,11 @@ public class AppConfig {
     }
 
     @Bean
+    public Queue reservaCanceladaQueue() {
+        return new Queue(QUEUE_RESERVA_CANCELADA, true);
+    }
+
+    @Bean
     public Binding bindingReservas(Queue reservasQueue, TopicExchange pagosExchange) {
         return BindingBuilder.bind(reservasQueue).to(pagosExchange).with("pago.*");
     }
@@ -39,4 +46,6 @@ public class AppConfig {
     public Jackson2JsonMessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
     }
+
+
 }

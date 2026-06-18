@@ -1,4 +1,4 @@
-package com.HomeRentSolution.MS_Pagos.mensajeria;
+package com.HomeRentSolution.MS_Pagos.listeners;
 
 import com.HomeRentSolution.MS_Pagos.dto.ReservaDTO;
 import com.HomeRentSolution.MS_Pagos.service.PagoService;
@@ -13,8 +13,7 @@ import org.springframework.stereotype.Component;
 public class PagoListeners {
 
 
-    private PagoService pagoService;
-
+    private final PagoService pagoService;
 
     @RabbitListener(queues = "pagos.reserva-creada.queue")
     public void recibirNuevaReserva(ReservaDTO creacion) {
@@ -25,8 +24,6 @@ public class PagoListeners {
     @RabbitListener(queues = "pagos.reserva-cancelada.queue")
     public void recibirReservaCancelada(ReservaDTO evento) {
         log.info("[RabbitMQ] MS-Pagos recibió orden de cancelación para la Reserva ID: {}", evento.getIdReserva());
-
-
         pagoService.eliminarPago(evento.getIdReserva());
     }
 

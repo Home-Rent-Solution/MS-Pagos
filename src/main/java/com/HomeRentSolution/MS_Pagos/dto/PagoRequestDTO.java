@@ -10,6 +10,6 @@ public class PagoRequestDTO extends RepresentationModel<PagoRequestDTO>{
 
     private Long idReserva;
     private Long idPropiedad;
-    private Long idInqulino;
+    private Long idInquilino;
     private BigDecimal montoTotal;
 }
