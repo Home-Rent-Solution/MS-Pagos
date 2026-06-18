@@ -1,7 +1,5 @@
 MS-Pagos
 
-.
-
 Funcionalidades
 Registrar pagos
 Consultar pagos
