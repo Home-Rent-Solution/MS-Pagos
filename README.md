@@ -10,7 +10,7 @@ Buscar pagos por reserva
 Consultar pagos mediante HATEOAS
 Endpoints Principales
 
-Obtener todos los seguros
+Obtener todos los pagos
 GET /api/v1/seguros
 
 Obtener pagos por ID
