@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/pagos")
+@RequestMapping("/api/v1/pagos")
 @RequiredArgsConstructor
 @Tag(name = "")
 public class PagoController {
@@ -34,7 +34,7 @@ public class PagoController {
     }
 
     @GetMapping("/recibo/{idPago}")
-    public ResponseEntity<PagoResponseDTO> obtenerRecibo(@PathVariable Long idPago) {
+    public ResponseEntity<PagoResponseDTO> obtenerPorId(@PathVariable Long idPago) {
         PagoResponseDTO dto = pagoServicios.obtenerRecibo(idPago);
 
         PagoResponseDTO response = assembler.agregarLinks(dto);
@@ -62,5 +62,15 @@ public class PagoController {
         return ResponseEntity.ok(detalle);
     }
 
+    @GetMapping
+    public ResponseEntity<List<PagoResponseDTO>> buscarTodosLosPagos() {
+        return ResponseEntity.ok(pagoServicios.obtenerTodos());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarPago(@PathVariable Long id) {
+        pagoServicios.eliminarPago(id);
+        return ResponseEntity.noContent().build();
+    }
 
 }
