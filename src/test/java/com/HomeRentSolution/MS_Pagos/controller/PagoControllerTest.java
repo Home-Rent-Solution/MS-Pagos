@@ -1,6 +1,6 @@
 package com.HomeRentSolution.MS_Pagos.controller;
 
-import com.HomeRentSolution.MS_Pagos.PagoService;
+import com.HomeRentSolution.MS_Pagos.service.PagoService;
 import com.HomeRentSolution.MS_Pagos.assemblers.PagoAssembler;
 import com.HomeRentSolution.MS_Pagos.dto.PagoResponseDTO;
 import com.HomeRentSolution.MS_Pagos.dto.ReservaDTO;

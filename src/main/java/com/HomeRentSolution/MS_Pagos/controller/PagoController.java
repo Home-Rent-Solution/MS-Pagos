@@ -4,7 +4,7 @@ import com.HomeRentSolution.MS_Pagos.assemblers.PagoAssembler;
 import com.HomeRentSolution.MS_Pagos.dto.PagoResponseDTO;
 import com.HomeRentSolution.MS_Pagos.dto.ReservaDTO;
 import com.HomeRentSolution.MS_Pagos.model.Pago;
-import com.HomeRentSolution.MS_Pagos.PagoService;
+import com.HomeRentSolution.MS_Pagos.service.PagoService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

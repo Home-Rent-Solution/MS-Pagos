@@ -1,4 +1,4 @@
-package com.HomeRentSolution.MS_Pagos;
+package com.HomeRentSolution.MS_Pagos.service;
 
 
 import com.HomeRentSolution.MS_Pagos.config.AppConfig;

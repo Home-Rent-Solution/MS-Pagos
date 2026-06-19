@@ -1,7 +1,7 @@
 package com.HomeRentSolution.MS_Pagos.listeners;
 
 import com.HomeRentSolution.MS_Pagos.dto.ReservaDTO;
-import com.HomeRentSolution.MS_Pagos.PagoService;
+import com.HomeRentSolution.MS_Pagos.service.PagoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
