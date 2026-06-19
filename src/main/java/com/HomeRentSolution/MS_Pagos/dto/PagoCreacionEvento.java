@@ -1,7 +1,5 @@
 package com.HomeRentSolution.MS_Pagos.dto;
 
-
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

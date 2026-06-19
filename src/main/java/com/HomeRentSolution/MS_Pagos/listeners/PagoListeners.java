@@ -26,6 +26,4 @@ public class PagoListeners {
         log.info("[RabbitMQ] MS-Pagos recibió orden de cancelación para la Reserva ID: {}", evento.getIdReserva());
         pagoService.eliminarPago(evento.getIdReserva());
     }
-
-
 }
