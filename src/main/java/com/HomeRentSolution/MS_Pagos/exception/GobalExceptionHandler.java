@@ -4,7 +4,8 @@ package com.HomeRentSolution.MS_Pagos.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
+import com.HomeRentSolution.MS_Pagos.dto.ErrorResponse;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -18,7 +19,7 @@ public class GobalExceptionHandler {
     // 404 - Pago no encontrado
     @ExceptionHandler(PagoNoEncontradoException.class)
     public ResponseEntity<ErrorResponse> handlePagoNotFound(PagoNoEncontradoException ex) {
-        log.warn("[EXCEPTION] PagoNotFoundException: {}", ex.getMessage());
+        log.warn("[EXCEPTION] PagoNoEncontradoException: {}", ex.getMessage());
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
                 "Recurso no encontrado",

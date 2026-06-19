@@ -5,6 +5,7 @@ import com.HomeRentSolution.MS_Pagos.dto.PagoCancelacionEvento;
 import com.HomeRentSolution.MS_Pagos.dto.PagoCreacionEvento;
 import com.HomeRentSolution.MS_Pagos.dto.PagoResponseDTO;
 import com.HomeRentSolution.MS_Pagos.dto.ReservaDTO;
+import com.HomeRentSolution.MS_Pagos.exception.PagoNoEncontradoException;
 import com.HomeRentSolution.MS_Pagos.model.EstadoPago;
 import com.HomeRentSolution.MS_Pagos.model.Pago;
 import com.HomeRentSolution.MS_Pagos.repository.PagoRepository;
@@ -61,8 +62,7 @@ public class PagoService {
     @Transactional
     public void cancelarPago(ReservaDTO request) {
         Pago pagoExistente = pagoRepository.findByIdReserva(request.getIdReserva())
-                .orElseThrow(() -> new RuntimeException(
-                        "No se encontró el pago para la reserva: " + request.getIdReserva()));
+                .orElseThrow(() -> new PagoNoEncontradoException("No se encontró el pago para la reserva ID: " + request.getIdReserva()));
 
         pagoExistente.setEstadoPago(EstadoPago.CANCELADO);
         pagoRepository.save(pagoExistente);
@@ -81,7 +81,7 @@ public class PagoService {
     @Transactional
     public void eliminarPago(Long id) {
         Pago pago = pagoRepository.findByIdPago(id)
-                .orElseThrow(() -> new RuntimeException("No se pudo eliminar: Pago no encontrado"));
+                .orElseThrow(() -> new PagoNoEncontradoException("No se pudo eliminar: Pago no encontrado con ID: " + id));
         pagoRepository.delete(pago);
         log.info("Pago eliminado físicamente de la base de datos: ID {}", id);
     }
@@ -89,7 +89,7 @@ public class PagoService {
 
     public Pago obtenerEntidadPorId(Long idPago) {
         return pagoRepository.findByIdPago(idPago)
-                .orElseThrow(() -> new RuntimeException("Pago no encontrado con ID: " + idPago));
+                .orElseThrow(() -> new PagoNoEncontradoException(idPago));
     }
 
     public List<Pago> obtenerTodos() {
