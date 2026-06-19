@@ -47,5 +47,4 @@ public class AppConfig {
         return new Jackson2JsonMessageConverter();
     }
 
-
 }

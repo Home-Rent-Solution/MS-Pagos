@@ -82,5 +82,4 @@ public class PagoController {
         pagoServicios.eliminarPago(id);
         return ResponseEntity.noContent().build();
     }
-
 }
