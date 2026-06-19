@@ -33,11 +33,16 @@ public class PagoController {
     public ResponseEntity<PagoResponseDTO> obtenerPorId(@PathVariable Long idPago) {
         Pago pago = pagoServicios.obtenerEntidadPorId(idPago);
 
-        // Mapeo plano manual (Sin links HATEOAS)
         PagoResponseDTO dto = new PagoResponseDTO();
         dto.setIdPago(pago.getIdPago());
+        dto.setIdReserva(pago.getIdReserva());
+        dto.setIdPropiedad(pago.getIdPropiedad());
+        dto.setIdInquilino(pago.getIdInquilino());
+        dto.setMontoTotal(pago.getMontoTotal());
+        dto.setMontoPagado(pago.getMontoPagado());
+        dto.setFechaPago(pago.getFechaPago());
+        dto.setFechaVencimiento(pago.getFechaVencimiento());
         dto.setEstadoPago(pago.getEstadoPago());
-        // ... setear los demás campos ...
 
         return ResponseEntity.ok(dto);
     }
@@ -49,6 +54,13 @@ public class PagoController {
                 .map(pago -> {
                     PagoResponseDTO dto = new PagoResponseDTO();
                     dto.setIdPago(pago.getIdPago());
+                    dto.setIdReserva(pago.getIdReserva());
+                    dto.setIdPropiedad(pago.getIdPropiedad());
+                    dto.setIdInquilino(pago.getIdInquilino());
+                    dto.setMontoTotal(pago.getMontoTotal());
+                    dto.setMontoPagado(pago.getMontoPagado());
+                    dto.setFechaPago(pago.getFechaPago());
+                    dto.setFechaVencimiento(pago.getFechaVencimiento());
                     dto.setEstadoPago(pago.getEstadoPago());
                     return dto;
                 })
