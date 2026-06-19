@@ -1,6 +1,7 @@
 package com.HomeRentSolution.MS_Pagos.service;
 
 
+import com.HomeRentSolution.MS_Pagos.config.AppConfig;
 import com.HomeRentSolution.MS_Pagos.dto.PagoCancelacionEvento;
 import com.HomeRentSolution.MS_Pagos.dto.PagoCreacionEvento;
 import com.HomeRentSolution.MS_Pagos.dto.PagoResponseDTO;
@@ -48,7 +49,7 @@ public class PagoService {
                 request.getIdInquilino(),
                 request.getMontoTotal()
         );
-        rabbitTemplate.convertAndSend("pagos.exchange", "", evento);
+        rabbitTemplate.convertAndSend(AppConfig.PAGOS_EXCHANGE, AppConfig.ROUTING_CREADO, evento);
         log.info("[RabbitMQ] Mensaje enviado al exchange de pagos para la Reserva: {}", request.getIdReserva());
 
         // Armamos la respuesta corta de confirmación
@@ -74,7 +75,7 @@ public class PagoService {
                 pagoExistente.getIdInquilino(),
                 pagoExistente.getMontoReembolso()
         );
-        rabbitTemplate.convertAndSend("pagos.cancelados.exchange", "", evento);
+        rabbitTemplate.convertAndSend(AppConfig.PAGOS_EXCHANGE, AppConfig.ROUTING_ELIMINADO, evento);
         log.info("[RabbitMQ] Mensaje de cancelación enviado para la Reserva: {}", request.getIdReserva());
     }
 
