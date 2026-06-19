@@ -1,55 +1,51 @@
-MS-Pagos
+# MS-Pagos
 
-Funcionalidades
-Registrar pagos
-Consultar pagos
-Actualizar pagos
-Eliminar seguros
-Buscar pagos 
-Buscar pagos por reserva
-Consultar pagos mediante HATEOAS
-Endpoints Principales
+Microservicio encargado de la gestión de pagos dentro del sistema **HomeRentSolution**.
 
-Obtener todos los pagos
-GET /api/v1/seguros
+## Funcionalidades
+- Registrar pagos
+- Consultar pagos
+- Eliminar pagos
+- Buscar pagos por inquilino
+- Consultar pagos mediante HATEOAS
+- Cancelar pagos
 
-Obtener pagos por ID
-GET /api/v1/seguros/{id}
+## Endpoints Principales
 
-Crear pagos
-POST /api/v1/pagos
+### API V1
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/v1/pagos` | Crear un pago |
+| GET | `/api/v1/pagos` | Obtener todos los pagos |
+| GET | `/api/v1/pagos/recibo/{idPago}` | Obtener pago por ID |
+| GET | `/api/v1/pagos/cuenta/inquilino/{idInquilino}` | Obtener pagos por inquilino |
+| DELETE | `/api/v1/pagos/{id}` | Eliminar un pago |
 
-Actualizar pagos
-PUT /api/v1/pagos/{id}
+### API V2 (HATEOAS)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/v2/pagos` | Obtener todos los pagos con enlaces |
+| GET | `/api/v2/pagos/recibo/{idPago}` | Obtener pago por ID con enlaces |
 
-Eliminar pagos
-DELETE /api/v1/pagos/{id}
+## Documentación API
+Swagger UI disponible en: `http://localhost:8085/doc/swagger-ui.html`
 
-Buscar pagos
-GET /api/v1/pagos
+## Integraciones
+Este microservicio se comunica mediante:
+- **OpenFeign** con MS-Reservas y MS-Inquilinos
+- **RabbitMQ** para eventos de creación y cancelación de pagos
+- **Eureka** para registro y descubrimiento de servicios
 
-Buscar por reserva
-GET /api/v1/pagos/reserva/{id}
-HATEOAS
-Obtener todos los seguros con enlaces
-GET /api/v2/pagos
-
-Obtener pagos por ID con enlaces
-GET /api/v2/pagos/{id}
-Integraciones
-Este microservicio utiliza OpenFeign para comunicarse con:
-
-MS-Reservas
-MS-Inquilinos
-Tecnologías
-Java 25
-Lombok
-Spring Boot
-Spring Data JPA
-SpringDoc
-RabbitMQ
-MySQL
-OpenAPI / Swagger
-OpenFeign
-HATEOAS
-Maven
+## Tecnologías
+- Java 21
+- Spring Boot
+- Spring Data JPA
+- Spring HATEOAS
+- Spring Cloud OpenFeign
+- Spring Cloud Netflix Eureka Client
+- RabbitMQ (AMQP)
+- MySQL
+- OpenAPI / Swagger
+- Lombok
+- Docker
+- Maven
