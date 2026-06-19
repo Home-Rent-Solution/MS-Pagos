@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 public class GobalExceptionHandler {
 
     // 404 - Pago no encontrado
-    @ExceptionHandler(PagoNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlePagoNotFound(PagoNotFoundException ex) {
+    @ExceptionHandler(PagoNoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> handlePagoNotFound(PagoNoEncontradoException ex) {
         log.warn("[EXCEPTION] PagoNotFoundException: {}", ex.getMessage());
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
