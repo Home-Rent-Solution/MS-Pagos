@@ -4,6 +4,12 @@ import com.HomeRentSolution.MS_Pagos.assemblers.PagoAssembler;
 import com.HomeRentSolution.MS_Pagos.dto.PagoResponseDTO;
 import com.HomeRentSolution.MS_Pagos.model.Pago;
 import com.HomeRentSolution.MS_Pagos.service.PagoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
@@ -26,7 +32,10 @@ public class PagoV2Controller {
     private final PagoAssembler assembler;
 
     @GetMapping("/recibo/{idPago}")
-    public ResponseEntity<PagoResponseDTO> obtenerPorId(@PathVariable Long idPago) {
+    @Operation(summary = "Obtener recibo HATEOAS", description = "Retorna el pago con enlaces de navegación relacionados.")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Pago HATEOAS", content = @Content(schema = @Schema(implementation = PagoResponseDTO.class))), @ApiResponse(responseCode = "404", description = "Pago no encontrado")})
+    public ResponseEntity<PagoResponseDTO> obtenerPorId(
+            @Parameter(description = "Identificador del pago", example = "1", required = true) @PathVariable Long idPago) {
 
         Pago pagoEntidad = pagoServicios.obtenerEntidadPorId(idPago);
 
@@ -36,6 +45,8 @@ public class PagoV2Controller {
         return ResponseEntity.ok(response);
     }
     @GetMapping
+    @Operation(summary = "Listar pagos HATEOAS", description = "Retorna la colección completa con enlaces de navegación.")
+    @ApiResponse(responseCode = "200", description = "Colección HATEOAS")
     public ResponseEntity<CollectionModel<PagoResponseDTO>> obtenerTodosConEnlaces() {
         List<Pago> pagos = pagoServicios.obtenerTodos();
         return ResponseEntity.ok(assembler.toCollectionModel(pagos));

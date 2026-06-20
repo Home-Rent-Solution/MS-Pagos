@@ -5,6 +5,13 @@ import com.HomeRentSolution.MS_Pagos.dto.PagoResponseDTO;
 import com.HomeRentSolution.MS_Pagos.dto.ReservaDTO;
 import com.HomeRentSolution.MS_Pagos.model.Pago;
 import com.HomeRentSolution.MS_Pagos.service.PagoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,13 +31,32 @@ public class PagoController {
     private final PagoAssembler assembler;
 
     @PostMapping
-    public ResponseEntity<Void> crearPago(@RequestBody ReservaDTO reservaDTO) {
+    @Operation(summary = "Crear pago", description = "Crea un pago pendiente a partir de los datos de una reserva y publica el evento correspondiente.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Pago creado"),
+            @ApiResponse(responseCode = "400", description = "Datos de reserva inválidos")
+    })
+    public ResponseEntity<Void> crearPago(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true,
+                    description = "Datos económicos de la reserva",
+                    content = @Content(schema = @Schema(implementation = ReservaDTO.class),
+                            examples = @ExampleObject(value = "{\"idReserva\":25,\"idPropiedad\":10,\"idInquilino\":7,\"montoTotal\":250000}")))
+            @RequestBody ReservaDTO reservaDTO) {
         pagoServicios.crearPago(reservaDTO);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/recibo/{idPago}")
-    public ResponseEntity<PagoResponseDTO> obtenerPorId(@PathVariable Long idPago) {
+    @Operation(summary = "Obtener recibo por ID de pago")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pago encontrado",
+                    content = @Content(schema = @Schema(implementation = PagoResponseDTO.class),
+                            examples = @ExampleObject(value = "{\"idPago\":1,\"idReserva\":25,\"montoTotal\":250000,\"montoPagado\":0,\"estadoPago\":\"PENDIENTE\"}"))),
+            @ApiResponse(responseCode = "404", description = "Pago no encontrado")
+    })
+    public ResponseEntity<PagoResponseDTO> obtenerPorId(
+            @Parameter(description = "Identificador del pago", example = "1", required = true)
+            @PathVariable Long idPago) {
         Pago pago = pagoServicios.obtenerEntidadPorId(idPago);
 
         PagoResponseDTO dto = new PagoResponseDTO();
@@ -48,7 +74,11 @@ public class PagoController {
     }
 
     @GetMapping("/cuenta/inquilino/{idInquilino}")
-    public ResponseEntity<List<PagoResponseDTO>> obtenerCuentaPorInquilino(@PathVariable Long idInquilino) {
+    @Operation(summary = "Listar pagos de un inquilino")
+    @ApiResponse(responseCode = "200", description = "Cuenta del inquilino consultada")
+    public ResponseEntity<List<PagoResponseDTO>> obtenerCuentaPorInquilino(
+            @Parameter(description = "Identificador del inquilino", example = "7", required = true)
+            @PathVariable Long idInquilino) {
         List<Pago> pagos = pagoServicios.obtenerPorInquilino(idInquilino);
         List<PagoResponseDTO> dtos = pagos.stream()
                 .map(pago -> {
@@ -69,6 +99,8 @@ public class PagoController {
     }
 
     @GetMapping
+    @Operation(summary = "Listar todos los pagos")
+    @ApiResponse(responseCode = "200", description = "Listado completo de pagos")
     public ResponseEntity<List<PagoResponseDTO>> buscarTodosLosPagos() {
         List<Pago> pagos = pagoServicios.obtenerTodos();
         List<PagoResponseDTO> dtos = pagos.stream()
@@ -78,7 +110,14 @@ public class PagoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarPago(@PathVariable Long id) {
+    @Operation(summary = "Eliminar pago")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Pago eliminado"),
+            @ApiResponse(responseCode = "404", description = "Pago no encontrado")
+    })
+    public ResponseEntity<Void> eliminarPago(
+            @Parameter(description = "Identificador del pago", example = "1", required = true)
+            @PathVariable Long id) {
         pagoServicios.eliminarPago(id);
         return ResponseEntity.noContent().build();
     }
