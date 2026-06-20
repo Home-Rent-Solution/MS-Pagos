@@ -52,18 +52,18 @@ services:
     networks:
       - homerent-net
 
-  # Gateway
-  #ms-gateway:
-  #  build: ./MS-Gateway
-  #  container_name: ms-gateway
-  #  ports:
-  #    - "8080:8080"
-  #  environment:
-  #    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://ms-eureka:8761/eureka/
-  #  depends_on:
-  #    - ms-eureka
-  #  networks:
-  #    - homerent-net
+   Gateway
+  ms-gateway:
+    build: ./MS-Gateway
+    container_name: ms-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://ms-eureka:8761/eureka/
+    depends_on:
+      - ms-eureka
+  networks:
+      - homerent-net
 
 networks:
   homerent-net:
