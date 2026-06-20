@@ -133,4 +133,29 @@ public class PagoServiceTest {
             pagoService.eliminarPago(99L);
         });
     }
+
+    @Test
+    void cancelarPago_debeCancelarYPublicarEvento() {
+        when(pagoRepository.findByIdReserva(1L)).thenReturn(Optional.of(pago));
+
+        pagoService.cancelarPago(reservaDTO);
+
+        assertEquals(EstadoPago.CANCELADO, pago.getEstadoPago());
+        verify(pagoRepository).save(pago);
+        verify(rabbitTemplate).convertAndSend(anyString(), anyString(), any(Object.class));
+    }
+
+    @Test
+    void cancelarPago_debeLanzarExcepcion_cuandoNoExiste() {
+        when(pagoRepository.findByIdReserva(1L)).thenReturn(Optional.empty());
+
+        assertThrows(PagoNoEncontradoException.class, () -> pagoService.cancelarPago(reservaDTO));
+    }
+
+    @Test
+    void obtenerPorInquilino_debeRetornarSusPagos() {
+        when(pagoRepository.findByIdInquilino(3L)).thenReturn(List.of(pago));
+
+        assertEquals(1, pagoService.obtenerPorInquilino(3L).size());
+    }
 }
