@@ -111,13 +111,25 @@ public class PagoService {
         return pagoRepository.findByIdPago(idPago)
                 .orElseThrow(() -> new PagoNoEncontradoException(idPago));
     }
+	public List<Pago> obtenerTodos() {
+    return pagoRepository.findAll();
+}
 
-    public List<Pago> obtenerTodos() {
-        return pagoRepository.findAll();
-    }
+@Transactional
+public void confirmarPago(Long idReserva) {
+    Pago pagoExistente = pagoRepository.findByIdReserva(idReserva)
+            .orElseThrow(() -> new PagoNoEncontradoException("No se encontró el pago para la reserva ID: " + idReserva));
 
-    public List<Pago> obtenerPorInquilino(Long idInquilino) {
-        return pagoRepository.findByIdInquilino(idInquilino);
-    }
+    pagoExistente.setEstadoPago(EstadoPago.PAGADO);
+    pagoExistente.setMontoPagado(pagoExistente.getMontoTotal());
+    pagoExistente.setFechaPago(LocalDateTime.now());
+
+    pagoRepository.save(pagoExistente);
+    log.info("Pago confirmado para la Reserva: {}", idReserva);
+}
+
+	public List<Pago> obtenerPorInquilino(Long idInquilino) {
+    return pagoRepository.findByIdInquilino(idInquilino);
+	}
 
 }

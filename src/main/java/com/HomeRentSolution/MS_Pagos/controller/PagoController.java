@@ -121,4 +121,14 @@ public class PagoController {
         pagoServicios.eliminarPago(id);
         return ResponseEntity.noContent().build();
     }
+
+	@PutMapping("/{idReserva}/confirmar")
+	@Operation(summary = "Confirmar pago por ID de reserva")
+	 @ApiResponse(responseCode = "204", description = "Pago confirmado correctamente")
+public ResponseEntity<Void> confirmarPago(
+        @Parameter(description = "Identificador de la reserva", example = "25", required = true)
+        @PathVariable Long idReserva) {
+    pagoServicios.confirmarPago(idReserva);
+    return ResponseEntity.noContent().build();
+	}	
 }
