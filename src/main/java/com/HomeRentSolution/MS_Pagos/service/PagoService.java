@@ -2,6 +2,7 @@ package com.HomeRentSolution.MS_Pagos.service;
 
 
 import com.HomeRentSolution.MS_Pagos.config.AppConfig;
+import com.HomeRentSolution.MS_Pagos.client.ReservaClient;
 import com.HomeRentSolution.MS_Pagos.dto.PagoCancelacionEvento;
 import com.HomeRentSolution.MS_Pagos.dto.PagoCreacionEvento;
 import com.HomeRentSolution.MS_Pagos.dto.PagoResponseDTO;
@@ -12,6 +13,7 @@ import com.HomeRentSolution.MS_Pagos.model.Pago;
 import com.HomeRentSolution.MS_Pagos.repository.PagoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import feign.FeignException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -27,9 +29,12 @@ public class PagoService {
 
     private final PagoRepository pagoRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final ReservaClient reservaClient;
 
     @Transactional
     public PagoResponseDTO crearPago(ReservaDTO request) {
+        validarReservaRemota(request);
+
         Pago nuevoPago = new Pago();
         nuevoPago.setIdReserva(request.getIdReserva());
         nuevoPago.setIdPropiedad(request.getIdPropiedad());
@@ -58,6 +63,20 @@ public class PagoService {
         response.setEstadoPago(nuevoPago.getEstadoPago());
 
         return response;
+    }
+
+    private void validarReservaRemota(ReservaDTO request) {
+        try {
+            ReservaDTO reserva = reservaClient.obtenerPorIdReserva(request.getIdReserva());
+            if (reserva == null || !request.getIdReserva().equals(reserva.getIdReserva())) {
+                throw new IllegalStateException("La respuesta de MS-Reservas no corresponde a la reserva solicitada");
+            }
+        } catch (FeignException.NotFound ex) {
+            throw new IllegalArgumentException("No existe la reserva ID: " + request.getIdReserva(), ex);
+        } catch (FeignException ex) {
+            log.error("Error remoto al validar la reserva {}: HTTP {}", request.getIdReserva(), ex.status());
+            throw new IllegalStateException("MS-Reservas no esta disponible para validar el pago", ex);
+        }
     }
 
     @Transactional

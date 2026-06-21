@@ -1,5 +1,6 @@
 package com.HomeRentSolution.MS_Pagos.service;
 
+import com.HomeRentSolution.MS_Pagos.client.ReservaClient;
 import com.HomeRentSolution.MS_Pagos.dto.PagoResponseDTO;
 import com.HomeRentSolution.MS_Pagos.dto.ReservaDTO;
 import com.HomeRentSolution.MS_Pagos.exception.PagoNoEncontradoException;
@@ -13,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import feign.FeignException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,6 +34,9 @@ public class PagoServiceTest {
 
     @Mock
     private RabbitTemplate rabbitTemplate;
+
+    @Mock
+    private ReservaClient reservaClient;
 
     // @InjectMocks inyecta los mocks anteriores en el servicio
     @InjectMocks
@@ -66,6 +71,7 @@ public class PagoServiceTest {
     // PRUEBA 1: crear un pago correctamente
     @Test
     void crearPago_debeRetornarPagoConEstadoPendiente() {
+        when(reservaClient.obtenerPorIdReserva(1L)).thenReturn(reservaDTO);
         // Simulamos que el repositorio guarda y devuelve el pago
         when(pagoRepository.save(any(Pago.class))).thenReturn(pago);
 
@@ -79,6 +85,27 @@ public class PagoServiceTest {
 
         // Verificamos que se envió mensaje a RabbitMQ
         verify(rabbitTemplate, times(1)).convertAndSend(anyString(), anyString(), any(Object.class));
+    }
+
+    @Test
+    void crearPago_debeRechazarRespuestaRemotaInvalida() {
+        when(reservaClient.obtenerPorIdReserva(1L)).thenReturn(null);
+
+        assertThrows(IllegalStateException.class, () -> pagoService.crearPago(reservaDTO));
+        verifyNoInteractions(pagoRepository, rabbitTemplate);
+    }
+
+    @Test
+    void crearPago_debeManejarErrorRemoto() {
+        FeignException errorRemoto = mock(FeignException.class);
+        when(errorRemoto.status()).thenReturn(503);
+        when(reservaClient.obtenerPorIdReserva(1L)).thenThrow(errorRemoto);
+
+        IllegalStateException error = assertThrows(IllegalStateException.class,
+                () -> pagoService.crearPago(reservaDTO));
+
+        assertTrue(error.getMessage().contains("MS-Reservas"));
+        verifyNoInteractions(pagoRepository, rabbitTemplate);
     }
 
     // PRUEBA 2: obtener un pago por ID que existe
