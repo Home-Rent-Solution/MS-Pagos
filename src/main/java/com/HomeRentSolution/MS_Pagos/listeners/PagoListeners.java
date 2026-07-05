@@ -2,18 +2,23 @@ package com.HomeRentSolution.MS_Pagos.listeners;
 
 import com.HomeRentSolution.MS_Pagos.dto.ReservaDTO;
 import com.HomeRentSolution.MS_Pagos.service.PagoService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class PagoListeners {
 
 
     private final PagoService pagoService;
+
+
+    @Autowired
+    public PagoListeners(PagoService pagoService) {
+        this.pagoService = pagoService;
+    }
 
     @RabbitListener(queues = "pagos.reserva-creada.queue")
     public void recibirNuevaReserva(ReservaDTO creacion) {

@@ -10,7 +10,6 @@ import com.HomeRentSolution.MS_Pagos.exception.PagoNoEncontradoException;
 import com.HomeRentSolution.MS_Pagos.model.EstadoPago;
 import com.HomeRentSolution.MS_Pagos.model.Pago;
 import com.HomeRentSolution.MS_Pagos.repository.PagoRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import feign.FeignException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -20,15 +19,23 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class PagoService {
 
     private final PagoRepository pagoRepository;
     private final RabbitTemplate rabbitTemplate;
     private final ReservaClient reservaClient;
+
+
+    @Autowired
+    public PagoService(PagoRepository pagoRepository, RabbitTemplate rabbitTemplate, ReservaClient reservaClient) {
+        this.pagoRepository = pagoRepository;
+        this.rabbitTemplate = rabbitTemplate;
+        this.reservaClient = reservaClient;
+    }
 
     @Transactional
     public PagoResponseDTO crearPago(ReservaDTO request) {

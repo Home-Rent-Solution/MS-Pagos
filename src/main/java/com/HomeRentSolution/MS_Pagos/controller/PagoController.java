@@ -13,22 +13,28 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @RequestMapping("/api/v1/pagos")
-@RequiredArgsConstructor
 @Tag(name = "Pagos V1", description = "API de consulta y gestión de pagos")
 public class PagoController {
 
     private final PagoService pagoServicios;
     private final PagoAssembler assembler;
+
+
+    @Autowired
+    public PagoController(PagoService pagoServicios, PagoAssembler assembler) {
+        this.pagoServicios = pagoServicios;
+        this.assembler = assembler;
+    }
 
     @PostMapping
     @Operation(summary = "Crear pago", description = "Crea un pago pendiente a partir de los datos de una reserva y publica el evento correspondiente.")

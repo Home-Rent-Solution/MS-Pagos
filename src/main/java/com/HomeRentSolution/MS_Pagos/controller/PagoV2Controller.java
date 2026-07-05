@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,16 +19,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @RequestMapping("/api/v2/pagos")
-@RequiredArgsConstructor
 @Tag(name = "Pagos V2 (HATEOAS)", description = "Endpoints de pagos que incluyen navegación por enlaces")
 
 public class PagoV2Controller {
 
     private final PagoService pagoServicios;
     private final PagoAssembler assembler;
+
+
+    @Autowired
+    public PagoV2Controller(PagoService pagoServicios, PagoAssembler assembler) {
+        this.pagoServicios = pagoServicios;
+        this.assembler = assembler;
+    }
 
     @GetMapping("/recibo/{idPago}")
     @Operation(summary = "Obtener recibo HATEOAS", description = "Retorna el pago con enlaces de navegación relacionados.")
