@@ -1,3 +1,6 @@
+server:
+  port: 8085
+
 spring:
   application:
     name: ms-pagos
@@ -23,10 +26,6 @@ spring:
     password: ${SPRING_RABBITMQ_PASSWORD:guest}
   main:
     allow-bean-definition-overriding: true
-
-server:
-  port: ${SERVER_PORT:8085}
-  forward-headers-strategy: framework
 
 eureka:
   client:
