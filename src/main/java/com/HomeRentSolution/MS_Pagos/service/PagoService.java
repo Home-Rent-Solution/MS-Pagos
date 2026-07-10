@@ -13,6 +13,7 @@ import com.HomeRentSolution.MS_Pagos.repository.PagoRepository;
 import lombok.extern.slf4j.Slf4j;
 import feign.FeignException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,8 @@ public class PagoService {
     private final RabbitTemplate rabbitTemplate;
     private final ReservaClient reservaClient;
 
+    @Value("${ms.reservas.validacion-habilitada:true}")
+    private boolean validacionReservaHabilitada;
 
     @Autowired
     public PagoService(PagoRepository pagoRepository, RabbitTemplate rabbitTemplate, ReservaClient reservaClient) {
@@ -39,6 +42,13 @@ public class PagoService {
 
     @Transactional
     public PagoResponseDTO crearPago(ReservaDTO request) {
+
+        if (validacionReservaHabilitada) {
+            validarReservaRemota(request);
+        } else {
+            log.warn("Validación remota de reserva DESHABILITADA (perfil sin ms-reservas disponible)");
+        }
+
         validarReservaRemota(request);
 
         Pago nuevoPago = new Pago();
@@ -137,5 +147,6 @@ public void confirmarPago(Long idReserva) {
 	public List<Pago> obtenerPorInquilino(Long idInquilino) {
     return pagoRepository.findByIdInquilino(idInquilino);
 	}
+
 
 }
