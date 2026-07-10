@@ -24,6 +24,7 @@ spring:
     port: ${SPRING_RABBITMQ_PORT:5672}
     username: ${SPRING_RABBITMQ_USERNAME:guest}
     password: ${SPRING_RABBITMQ_PASSWORD:guest}
+    publicacion-habilitada: ${RABBITMQ_PUBLICACION_HABILITADA:true}
   main:
     allow-bean-definition-overriding: true
 
