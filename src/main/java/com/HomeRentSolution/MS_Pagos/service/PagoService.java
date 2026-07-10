@@ -33,6 +33,9 @@ public class PagoService {
     @Value("${ms.reservas.validacion-habilitada:true}")
     private boolean validacionReservaHabilitada;
 
+    @Value("${rabbitmq.publicacion-habilitada:true}")
+    private boolean publicacionRabbitHabilitada;
+
     @Autowired
     public PagoService(PagoRepository pagoRepository, RabbitTemplate rabbitTemplate, ReservaClient reservaClient) {
         this.pagoRepository = pagoRepository;
@@ -42,14 +45,11 @@ public class PagoService {
 
     @Transactional
     public PagoResponseDTO crearPago(ReservaDTO request) {
-
         if (validacionReservaHabilitada) {
             validarReservaRemota(request);
         } else {
             log.warn("Validación remota de reserva DESHABILITADA (perfil sin ms-reservas disponible)");
         }
-
-        validarReservaRemota(request);
 
         Pago nuevoPago = new Pago();
         nuevoPago.setIdReserva(request.getIdReserva());
@@ -63,20 +63,20 @@ public class PagoService {
 
         pagoRepository.save(nuevoPago);
 
+        if (publicacionRabbitHabilitada) {
+            PagoCreacionEvento evento = new PagoCreacionEvento(
+                    request.getIdReserva(),
+                    request.getIdPropiedad(),
+                    request.getIdInquilino(),
+                    request.getMontoTotal()
+            );
+            rabbitTemplate.convertAndSend(AppConfig.PAGOS_EXCHANGE, AppConfig.ROUTING_CREADO, evento);
+            log.info("[RabbitMQ] Mensaje enviado al exchange de pagos para la Reserva: {}", request.getIdReserva());
+        } else {
+            log.warn("Publicación en RabbitMQ DESHABILITADA (perfil sin RabbitMQ disponible)");
+        }
 
-        PagoCreacionEvento evento = new PagoCreacionEvento(
-                request.getIdReserva(),
-                request.getIdPropiedad(),
-                request.getIdInquilino(),
-                request.getMontoTotal()
-        );
-        rabbitTemplate.convertAndSend(AppConfig.PAGOS_EXCHANGE, AppConfig.ROUTING_CREADO, evento);
-        log.info("[RabbitMQ] Mensaje enviado al exchange de pagos para la Reserva: {}", request.getIdReserva());
-    } else {
-        log.warn("Publicación en RabbitMQ DESHABILITADA (perfil sin RabbitMQ disponible)");
-    }
-
-    PagoResponseDTO response = new PagoResponseDTO();
+        PagoResponseDTO response = new PagoResponseDTO();
         response.setIdPago(nuevoPago.getIdPago());
         response.setEstadoPago(nuevoPago.getEstadoPago());
 
