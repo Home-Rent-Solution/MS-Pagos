@@ -72,9 +72,11 @@ public class PagoService {
         );
         rabbitTemplate.convertAndSend(AppConfig.PAGOS_EXCHANGE, AppConfig.ROUTING_CREADO, evento);
         log.info("[RabbitMQ] Mensaje enviado al exchange de pagos para la Reserva: {}", request.getIdReserva());
+    } else {
+        log.warn("Publicación en RabbitMQ DESHABILITADA (perfil sin RabbitMQ disponible)");
+    }
 
-        // Armamos la respuesta corta de confirmación
-        PagoResponseDTO response = new PagoResponseDTO();
+    PagoResponseDTO response = new PagoResponseDTO();
         response.setIdPago(nuevoPago.getIdPago());
         response.setEstadoPago(nuevoPago.getEstadoPago());
 
