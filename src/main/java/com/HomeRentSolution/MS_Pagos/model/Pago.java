@@ -32,6 +32,9 @@ public class Pago {
     @Column(nullable = false)
     private BigDecimal montoTotal;
 
+    @Column(unique = true)
+    private String tokenPasarela;
+
     @Column(nullable = false)
     private BigDecimal montoPagado;
 

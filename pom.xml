@@ -61,6 +61,11 @@
 			<version>2.8.16</version>
 		</dependency>
 		<dependency>
+			<groupId>com.github.transbankdevelopers</groupId>
+			<artifactId>transbank-sdk-java</artifactId>
+			<version>5.0.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>

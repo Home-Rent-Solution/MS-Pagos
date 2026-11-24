@@ -11,4 +11,5 @@ public interface PagoRepository extends JpaRepository<Pago, Long> {
     Optional<Pago> findByIdPago(Long idPago);
     List<Pago> findByIdInquilino(Long idInquilino);
     Optional<Pago> findByIdReserva(Long idReserva);
+    Optional<Pago> findByTokenPasarela(String tokenPasarela);
 }

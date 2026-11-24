@@ -131,10 +131,31 @@ public class PagoController {
 	@PutMapping("/{idReserva}/confirmar")
 	@Operation(summary = "Confirmar pago por ID de reserva")
 	 @ApiResponse(responseCode = "204", description = "Pago confirmado correctamente")
-public ResponseEntity<Void> confirmarPago(
+    public ResponseEntity<Void> confirmarPago(
         @Parameter(description = "Identificador de la reserva", example = "25", required = true)
         @PathVariable Long idReserva) {
     pagoServicios.confirmarPago(idReserva);
     return ResponseEntity.noContent().build();
-	}	
+	}
+
+    @PostMapping("/procesar")
+    public ResponseEntity<?> procesar(@RequestParam Long ordenId, @RequestParam double monto) {
+        try {
+            return ResponseEntity.ok(pagoServicios.procesarPago(ordenId, monto));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al iniciar pago: " + e.getMessage());
+        }
+    }
+
+    // Endpoint 2: Transbank redirige al usuario aquí automáticamente después de pagar
+    // Envía el parámetro "token_ws" en la URL (GET)
+    @GetMapping("/confirmar")
+    public ResponseEntity<?> confirmar(@RequestParam("token_ws") String tokenWs) {
+        try {
+            Pago pagoActualizado = pagoServicios.confirmarPago(tokenWs);
+            return ResponseEntity.ok(pagoActualizado);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al confirmar pago: " + e.getMessage());
+        }
+    }
 }

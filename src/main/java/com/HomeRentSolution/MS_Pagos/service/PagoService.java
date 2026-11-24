@@ -1,5 +1,8 @@
 package com.HomeRentSolution.MS_Pagos.service;
 
+import cl.transbank.webpay.webpayplus.WebpayPlus;
+import cl.transbank.webpay.webpayplus.responses.WebpayPlusTransactionCommitResponse;
+import cl.transbank.webpay.webpayplus.responses.WebpayPlusTransactionCreateResponse;
 import com.HomeRentSolution.MS_Pagos.config.AppConfig;
 import com.HomeRentSolution.MS_Pagos.client.ReservaClient;
 import com.HomeRentSolution.MS_Pagos.dto.PagoCancelacionEvento;
@@ -20,6 +23,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
@@ -133,22 +138,69 @@ public class PagoService {
     return pagoRepository.findAll();
 }
 
-@Transactional
-public void confirmarPago(Long idReserva) {
-    Pago pagoExistente = pagoRepository.findByIdReserva(idReserva)
-            .orElseThrow(() -> new PagoNoEncontradoException("No se encontró el pago para la reserva ID: " + idReserva));
+    @Transactional
+    public void confirmarPago(Long idReserva) {
+        Pago pagoExistente = pagoRepository.findByIdReserva(idReserva)
+                .orElseThrow(() -> new PagoNoEncontradoException("No se encontró el pago para la reserva ID: " + idReserva));
 
-    pagoExistente.setEstadoPago(EstadoPago.PAGADO);
-    pagoExistente.setMontoPagado(pagoExistente.getMontoTotal());
-    pagoExistente.setFechaPago(LocalDateTime.now());
+        pagoExistente.setEstadoPago(EstadoPago.PAGADO);
+        pagoExistente.setMontoPagado(pagoExistente.getMontoTotal());
+        pagoExistente.setFechaPago(LocalDateTime.now());
 
-    pagoRepository.save(pagoExistente);
-    log.info("Pago confirmado para la Reserva: {}", idReserva);
-}
+        pagoRepository.save(pagoExistente);
+        log.info("Pago confirmado para la Reserva: {}", idReserva);
+    }
 
 	public List<Pago> obtenerPorInquilino(Long idInquilino) {
     return pagoRepository.findByIdInquilino(idInquilino);
 	}
 
+    // PROCESAR PAGO
+    public Map<String, String> procesarPago(Long ordenId, double monto) throws Exception {
+        // 1. Guardamos en BD como PENDIENTE
+        Pago pago = new Pago();
+        pago.setIdPago(ordenId);
+        pago.setMontoTotal(BigDecimal.valueOf(monto));
+        pago.setEstadoPago(EstadoPago.valueOf("PENDIENTE"));
+        pago = pagoRepository.save(pago);
 
+        // 2. Parámetros que exige Transbank
+        String buyOrder = "ORDEN-" + pago.getIdPago(); // Máximo 26 caracteres
+        String sessionId = "SESION-" + ordenId;
+        String returnUrl = "http://localhost:8080/api/pagos/confirmar"; // A dónde vuelve el usuario tras pagar
+
+        // 3. Llamamos a Transbank (Modo pruebas por defecto)
+        WebpayPlus.Transaction tx = new WebpayPlus.Transaction();
+        WebpayPlusTransactionCreateResponse response = tx.create(buyOrder, sessionId, monto, returnUrl);
+
+        // 4. Guardamos el token que nos dio Transbank para reconocer el pago a la vuelta
+        pago.setTokenPasarela(response.getToken());
+        pagoRepository.save(pago);
+
+        // 5. Devolvemos la URL y el Token al frontend para que redirija al usuario a Webpay/BancoEstado
+        return Map.of(
+                "url", response.getUrl(),
+                "token", response.getToken()
+        );
+    }
+
+    // CONFIRMAR EL PAGO (Cuando el usuario vuelve de BancoEstado)
+    public Pago confirmarPago(String tokenWs) throws Exception {
+        // 1. Buscamos el pago en nuestra BD usando el token
+        Pago pago = pagoRepository.findByTokenPasarela(tokenWs)
+                .orElseThrow(() -> new RuntimeException("Pago no encontrado"));
+
+        // 2. Le pedimos a Transbank que confirme la transacción (commit)
+        WebpayPlus.Transaction tx = new WebpayPlus.Transaction();
+        WebpayPlusTransactionCommitResponse response = tx.commit(tokenWs);
+
+        // 3. Revisamos si el banco aprobó (responseCode == 0 significa APROBADO en Transbank)
+        if ("AUTHORIZED".equals(response.getStatus()) && response.getResponseCode() == 0) {
+            pago.setEstadoPago(EstadoPago.valueOf("PAGADO"));
+        } else {
+            pago.setEstadoPago(EstadoPago.valueOf("RECHAZADO"));
+        }
+
+        return pagoRepository.save(pago);
+    }
 }
