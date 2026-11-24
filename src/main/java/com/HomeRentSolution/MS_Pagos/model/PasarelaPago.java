@@ -2,6 +2,8 @@ package com.HomeRentSolution.MS_Pagos.model;
 
 import org.springframework.web.client.RestClient;
 
+import java.util.Map;
+
 public class PasarelaPago {
 
     // Herramienta de Spring para hacer peticiones HTTP a internet
