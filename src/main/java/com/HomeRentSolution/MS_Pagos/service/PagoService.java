@@ -38,7 +38,7 @@ public class PagoService {
     @Value("${ms.reservas.validacion-habilitada:true}")
     private boolean validacionReservaHabilitada;
 
-    @Value("${rabbitmq.publicacion-habilitada:true}")
+    @Value("${spring.rabbitmq.publicacion-habilitada:false}")
     private boolean publicacionRabbitHabilitada;
 
     @Autowired
